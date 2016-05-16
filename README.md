@@ -4,7 +4,7 @@ HanSight Animated Bewbew Attack Map v1.0
 
 ## Quick Start
 
-### 使用用Bower 安装
+### 使用Bower 安装
 * 运行 `bower install bewbew --save`
 * 在页面的html文件中引用：
 

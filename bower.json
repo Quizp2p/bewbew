@@ -1,0 +1,33 @@
+{
+  "name": "bewbew",
+  "authors": [
+    "Quiz42 <quizzhu@gmail.com>"
+  ],
+  "description": "Animated thread attack map",
+  "main": "js/bewbew.js",
+  "dependencies": {
+     "elasticsearch": "^11.0.1",
+     "perfect-scrollbar": "^0.6.11",
+     "moment": "^2.13.0",
+     "d3": "^3.5.17",
+     "topojson": "^1.6.26",
+     "jquery": "2.1.1",
+     "datamaps": "^0.5.4"
+ },
+  "moduleType": [],
+  "keywords": [
+    "Security",
+    "Hansight.com",
+    "Attack",
+    "Map"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

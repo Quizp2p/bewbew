@@ -1,4 +1,4 @@
-(function () {
+(function() {
 
     var demoMode = false;
     var lastTimestamp = '2016-01-01T00:00:00+08:00';
@@ -33,10 +33,9 @@
         hoverinfo_bg: '#131a0e'
     };
 
-    var dcLocation = {
-        lat: '39.03',
-        lon: '117.68'
-    };
+    var dcLocation;
+    var srcKeys;
+    var destKeys;
 
     var lastFrameTime = 0;
     var lastMapupdateTime = 0;
@@ -45,7 +44,7 @@
     // Get elastic search
     var elasticsearchHost = 'http://' + window.location.host + '/elasticsearch/';
 
-//  Declare an ES client in the IIFE funcion scope
+    //  Declare an ES client in the IIFE funcion scope
     var client;
 
     var asyncLock = false;
@@ -138,6 +137,25 @@
         boomBuffer;
 
 
+    function getObjAttribute(obj, path) {
+        if ((typeof path === 'string') && path) {
+            pathSerie = path.split('.');
+            console.log(pathSerie);
+        } else {
+            return '';
+        }
+        if (typeof obj !== 'object') {
+            return '';
+        }
+        var result = obj;
+        pathSerie.forEach(function(subPath) {
+            console.log(result);
+            result = result[subPath];
+        });
+        console.log(result);
+        return result;
+
+    }
 
 
     // the fun begins! =============================================================
@@ -160,7 +178,7 @@
         } else {
             return 'red';
         }
-    }
+    };
 
     var results = [];
 
@@ -294,9 +312,11 @@
                 $('#attackdiv').find(".attack_intel").slice(0, 1).remove();
             }
 
-            $('#attackdiv').append("<div class='attack_intel' style=color:" + attackDivColors.text_color + " >" + intel.country + " ，" + intel.region + "<span class='attack_ip' style='color:" + attackDivColors.ip_color + " '> (" + intel.ip + ") </span> - " +
+            $('#attackdiv').append(
+                "<div class='attack_intel' style=color:" + attackDivColors.text_color + " >" + intel.srcCountry + " ，" + intel.srcRegion + "<span class='attack_ip' style='color:" + attackDivColors.ip_color + " '> (" + intel.srcIp + ") </span> - " +
+                intel.destCountry + " ，" + intel.destRegion + "<span class='attack_ip' style='color:" + attackDivColors.ip_color + " '> (" + intel.destIp + ") </span>  <" +
                 " <span  class='attack_alert' style='color:" + attackDivColors.alert_color + "'> 攻击类型: </span> " +
-                " <span class='attack_type' style='color:" + attackColors[intel.which_attack] + "'>  " + " " + intel.which_attack + " </span> " +
+                " <span class='attack_type' style='color:" + attackColors[intel.which_attack] + "'>  " + " " + intel.which_attack + " </span> >" +
                 "</div>");
             $('#attackdiv').animate({
                 scrollTop: $('#attackdiv').prop("scrollHeight")
@@ -338,14 +358,48 @@
                         var result = {};
                         // add hit to the arc queue
 
+                        var destLoc = dcLocation;
+
+                        if (!destLoc) {
+                            destLoc = {
+                                lat: '39.03',
+                                lon: '117.68',
+                                country: '中国',
+                                region: '天津',
+                                ip: '127.0.0.1'
+                            };
+                        }
+
+                        if (dcLocation == 'auto') {
+                            destLoc = {
+                                lat: getObjAttribute(esResult, '_source.' + destKeys.latKey),
+                                lon: getObjAttribute(esResult, '_source.' + destKeys.lonKey),
+                                // lat : +esResult._source[destLocKay][destLocKayLat],
+                                // lon : +esResult._source[destLocKay][destLocKayLon]
+                                country: getObjAttribute(esResult, '_source.' + destKeys.countryKey),
+                                region: getObjAttribute(esResult, '_source.' + destKeys.regionKey),
+                                ip: getObjAttribute(esResult, '_source.' + destKeys.ipKey)
+                            };
+                        };
+
+                        var srcLoc = {
+                            lat: getObjAttribute(esResult, '_source.' + srcKeys.latKey),
+                            lon: getObjAttribute(esResult, '_source.' + srcKeys.lonKey),
+                            country: getObjAttribute(esResult, '_source.' + srcKeys.countryKey),
+                            region: getObjAttribute(esResult, '_source.' + srcKeys.regionKey),
+                            ip: getObjAttribute(esResult, '_source.' + srcKeys.ipKey)
+                        }
+
                         result.hit = {
                             origin: {
-                                latitude: +esResult._source.c_ip.location.lat,
-                                longitude: +esResult._source.c_ip.location.lon
+                                latitude: +srcLoc.lat,
+                                longitude: +srcLoc.lon
+                                    // latitude: +esResult._source.c_ip.location.lat,
+                                    // longitude: +esResult._source.c_ip.location.lon
                             },
                             destination: {
-                                latitude: +dcLocation.lat,
-                                longitude: +dcLocation.lon
+                                latitude: +destLoc.lat,
+                                longitude: +destLoc.lon
                             }
                         };
 
@@ -354,17 +408,25 @@
 
                         result.boom = {
                             radius: 7,
-                            latitude: +esResult._source.c_ip.location.lat,
-                            longitude: +esResult._source.c_ip.location.lon,
+                            latitude: +srcLoc.lat,
+                            longitude: +srcLoc.lon,
+                            // latitude: +esResult._source.c_ip.location.lat,
+                            // longitude: +esResult._source.c_ip.location.lon,
                             fillOpacity: 0.5,
-                            attk: esResult._source.analysis
+                            attk: esResult._source[attackField]
                         };
 
                         result.intel = {
-                            country: esResult._source.c_ip.regionl0,
-                            region: esResult._source.c_ip.regionl1,
-                            ip: esResult._source.c_ip.ip,
-                            which_attack: esResult._source.analysis
+                            // country: esResult._source.c_ip.regionl0,
+                            // region: esResult._source.c_ip.regionl1,
+                            // ip: esResult._source.c_ip.ip,
+                            srcCountry: srcLoc.country,
+                            srcRegion: srcLoc.region,
+                            srcIp: srcLoc.ip,
+                            destCountry: destLoc.country,
+                            destRegion: destLoc.region,
+                            destIp: destLoc.ip,
+                            which_attack: esResult._source[attackField]
                         };
 
                         results.push(result);
@@ -387,19 +449,21 @@
 
     window.bewbew = function(config) {
         if (config) {
-        demoMode = config.demoMode ? config.demoMode : demoMode;
-        lastTimestamp = config.lastTimestamp ?  config.lastTimestamp : lastTimestamp;
-        bufferSize = config.bufferSize ? config.bufferSize :  bufferSize;
-        esWindowSize = config.esWindowSize ? config.esWindowSize : esWindowSize;
-        animateRefreshTime = config.animateRefreshTime ? config.animateRefreshTime : animateRefreshTime;
-        esRefreshTime = config.esRefreshTime ? config.esRefreshTime : esRefreshTime;
-        indexPattern = config.indexPattern ? config.indexPattern : indexPattern;
-        attackField = config.attackField ? config.attackField: attackField;
-        attackDivColors = config.attackDivColors ? config.attackDivColors : attackDivColors;
-        attackColors = config.attackColors ? config.attackColors : attackColors;
-        mapColors = config.mapColors ? config.mapColors : mapColors;
-        dcLocation = config.dcLocation ? config.dcLocation : dcLocation;
-    }
+            demoMode = config.demoMode ? config.demoMode : demoMode;
+            lastTimestamp = config.lastTimestamp ? config.lastTimestamp : lastTimestamp;
+            bufferSize = config.bufferSize ? config.bufferSize : bufferSize;
+            esWindowSize = config.esWindowSize ? config.esWindowSize : esWindowSize;
+            animateRefreshTime = config.animateRefreshTime ? config.animateRefreshTime : animateRefreshTime;
+            esRefreshTime = config.esRefreshTime ? config.esRefreshTime : esRefreshTime;
+            indexPattern = config.indexPattern ? config.indexPattern : indexPattern;
+            attackField = config.attackField ? config.attackField : attackField;
+            attackDivColors = config.attackDivColors ? config.attackDivColors : attackDivColors;
+            attackColors = config.attackColors ? config.attackColors : attackColors;
+            mapColors = config.mapColors ? config.mapColors : mapColors;
+            dcLocation = config.dcLocation;
+            srcKeys = config.srcKeys;
+            destKeys = config.destKeys;
+        }
 
         // start the ball rolling!
         $('.perfect').perfectScrollbar();
@@ -409,9 +473,9 @@
 
         // lazy-dude's responsive window
         d3.select(window).on('resize', function() {
-                location.reload();
-            });
+            location.reload();
+        });
 
-        };
+    };
 
-    }());
+}());

@@ -1,10 +1,10 @@
 # Bewbew Attack Map
 
-HanSight Animated Bewbew Attack Map v1.0
+HanSight Animated Bewbew Attack Map v0.1.0
 
 ## Quick Start
 
-### 使用用Bower 安装
+### 使用Bower 安装
 * 运行 `bower install bewbew --save`
 * 在页面的html文件中引用：
 
@@ -159,7 +159,10 @@ bewbewConfig.dcLocation = {
 }
 ````
 
-在给出的示例数据中攻击地图会找出所有涵 `analysis` field条目，然后会取该field中的值作为攻击类型;
+在给出的示例数据中攻击地图会找出所有包含 `analysis` field的条目，然后会取该field中的值作为攻击类型;
+
 根据`@timestamp`生成攻击的时间序列；
+
 攻击来源地国家，地区，ip分别会读取 `c_ip.regionl0` ， `c_ip.regionl1`, `c_ip.ip` ;
+
 攻击在地图上的起始地址会根据 `c_ip.location` 中的经纬度坐标来确定.

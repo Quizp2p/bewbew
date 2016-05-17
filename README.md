@@ -1,6 +1,6 @@
 # Bewbew Attack Map
 
-HanSight Animated Bewbew Attack Map v0.1.1
+HanSight Animated Bewbew Attack Map v0.1.2
 
 ## Quick Start
 

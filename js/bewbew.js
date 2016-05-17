@@ -140,7 +140,7 @@
     function getObjAttribute(obj, path) {
         if ((typeof path === 'string') && path) {
             pathSerie = path.split('.');
-            console.log(pathSerie);
+            // console.log(pathSerie);
         } else {
             return '';
         }
@@ -149,10 +149,10 @@
         }
         var result = obj;
         pathSerie.forEach(function(subPath) {
-            console.log(result);
+            // console.log(result);
             result = result[subPath];
         });
-        console.log(result);
+        // console.log(result);
         return result;
 
     }
@@ -224,11 +224,16 @@
             apiVersion: '1.7'
                 //    log: 'trace'
         });
+        $('#attack_container').html(
+            '<center><div id="attack_map_container"></div></center><div id="attackdiv" class="perfect"></div>'
+        );
+        // console.log($('.perfect'));
+        $('.perfect').perfectScrollbar();
 
         map = new Datamap({
 
             scope: 'world',
-            element: document.getElementById('container1'),
+            element: document.getElementById('attack_map_container'),
             projection: 'winkel3',
             // change the projection to something else only if you have absolutely no cartographic sense
 
@@ -466,7 +471,7 @@
         }
 
         // start the ball rolling!
-        $('.perfect').perfectScrollbar();
+
         $(document).ready(function() {
             init();
         });

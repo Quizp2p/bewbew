@@ -1,6 +1,6 @@
 # Bewbew Attack Map
 
-HanSight Animated Bewbew Attack Map v0.1.0
+HanSight Animated Bewbew Attack Map v0.1.1
 
 ## Quick Start
 
@@ -28,7 +28,12 @@ HanSight Animated Bewbew Attack Map v0.1.0
 * 通过修改bewbew.css文件可以定制地图的外观和布局:
 
 ```css
+center {
+    height: 100%;
+}
+
 #attack_container {
+    height: 100%;
     background-color: black;
     overflow-y:hidden;
 }
@@ -49,24 +54,18 @@ HanSight Animated Bewbew Attack Map v0.1.0
     overflow-y: auto;
 }
 
-#container1 {
+#attack_map_container {
     position: relative;
     width: auto;
     height: 100%;
 
 }
-
 ```
 
-* 在页面中加入html元素:
+* 在页面中需要注入攻击图的元素上添加`id = "attack_container"`:
 
 ````html
 <div class="application" id="attack_container">
-
-    <center>
-        <div id="container1"></div>
-    </center>
-    <div id="attackdiv" class="perfect"></div>
 </div>
 ````
 
@@ -74,10 +73,9 @@ HanSight Animated Bewbew Attack Map v0.1.0
 
 ```javascript
 var bewbewConfig = {
-        demoMode: true,
-        esWindowSize: 5
+        demoMode: true
     };
-    bewbew(bewbewConfig);
+bewbew(bewbewConfig);
 ```
 
 其中 `bewbewConfigs` 是地图的配置项：
@@ -118,11 +116,37 @@ bewbewConfig.mapColors = {
     hoverinfo_bg: '#393649'
 };
 
-//数据中心的经纬度坐标
-bewbewConfig.dcLocation = {
-    lat: '39.03',
-    lon: '117.68'
-};
+//当使用ES查询无法获得攻击目标信息时，可以手动指定
+bewbewConfig.dcLocation =dcLocation: {
+        lat: '39.03',
+        lon: '117.68',
+        country: '天朝',
+        region: '塘沽港',
+        ip: '666.666.666.666'
+    };
+
+//使用ES查询返回结果中`_source`字段中包含的攻击目标信息
+bewbewConfig.dcLocation = 'auto';
+
+//指定获取攻击目标信息时取哪些`_source`字段中的子字段
+bewbewConfig.destKeys = {
+            latKey: 'c_ip.location.lat', //攻击目标纬度
+            lonKey: 'c_ip.location.lon', //攻击目标经度
+            countryKey: 'c_ip.regionl0', //攻击目标的国家
+            regionKey: 'c_ip.regionl1',  //攻击目标的地区
+            ipKey: 'c_ip.ip' //攻击目标的IP
+        }
+
+//指定获取攻击来源信息时取哪些`_source`字段中的子字段
+bewbewConfig.srccKeys = {
+            latKey: 'c_ip.location.lat', //攻击来源纬度
+            lonKey: 'c_ip.location.lon', //攻击来源经度
+            countryKey: 'c_ip.regionl0', //攻击来源的国家
+            regionKey: 'c_ip.regionl1',  //攻击来源的地区
+            ipKey: 'c_ip.ip' //攻击来源的IP
+        }
+
+
 ````
 
 ## Elastic Search 中的数据
@@ -161,8 +185,4 @@ bewbewConfig.dcLocation = {
 
 在给出的示例数据中攻击地图会找出所有包含 `analysis` field的条目，然后会取该field中的值作为攻击类型;
 
-根据`@timestamp`生成攻击的时间序列；
-
-攻击来源地国家，地区，ip分别会读取 `c_ip.regionl0` ， `c_ip.regionl1`, `c_ip.ip` ;
-
-攻击在地图上的起始地址会根据 `c_ip.location` 中的经纬度坐标来确定.
+根据`@timestamp`生成攻击的时间序列。

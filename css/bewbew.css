@@ -1,12 +1,10 @@
-body{
-    height: 100vh;
-}
 
-.content, .application, center {
+center {
     height: 100%;
 }
 
 #attack_container {
+    height: 100%;
     background-color: black;
     overflow-y:hidden;
 }
@@ -27,7 +25,7 @@ body{
     overflow-y: auto;
 }
 
-#container1 {
+#attack_map_container {
     position: relative;
     width: auto;
     height: 100%;

@@ -216,3 +216,4 @@ $RECYCLE.BIN/
 .sass-cache/
 *.css.map
 
+test/
